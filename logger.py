@@ -1,10 +1,9 @@
-#!/usr/bin/env python
 from datetime import datetime
 import serial
 import xbee
 import settings
 import os
-
+import csv
 
 
 def main():
@@ -21,22 +20,25 @@ def log():
     # and pass it an instance of the Serial class
     xbee1 = xbee.ZigBee(ser_port)
 
-def auth_upload():
-
-    while True:
+        while True:
         data_samples = xbee1.wait_read_frame()
         samples = data_samples['samples'][0]
 
         node_id = data_samples['source_addr_long']
         time = datetime.now()
+
         vwc_600 = ((11.9*(((float(samples['adc-0'])*1200)/1024)/10000))-0.401)*100
         vwc_300 = ((11.9*(((float(samples['adc-1'])*1200)/1024)/10000))-0.401)*100
         temp_100 = ((((float(samples['adc-2'])*1.2)/1024)*3)*41.67)-40
         battery = float(samples['adc-3'])
-        node_id = data_samples['source_addr_long']
 
-        #payload = {'node_id':node_id,'temp':temperature, 'vwc_60':vwcOne, 'vwc_30':vwcTwo, 'date':datetime.now()}
+        new_record = time+','+node_id+','+battery
+        log_write(new_record)
 
+def log_write(new_record):
+    with open('log.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(new_record)
 
 
 if __name__ == "__main__":
