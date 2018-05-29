@@ -14,15 +14,18 @@ def main():
     log()
 
 def log():
-    SERIAL_PORT = '/dev/ttyUSB0' # Change this depending on where the serial port is, this may be fine though
+    #SERIAL_PORT = '/dev/ttyUSB0'
+    SERIAL_PORT = 'COM4'
     BAUD_RATE = 9600
     # Instantiate an instance for the serial port
     ser_port = serial.Serial(SERIAL_PORT, BAUD_RATE)
     # Instantiate an instance of the ZigBee class
     # and pass it an instance of the Serial class
     xbee1 = xbee.ZigBee(ser_port)
+    
+    print("initialising serial port listening...")
 
-        while True:
+    while True:
         data_samples = xbee1.wait_read_frame()
         samples = data_samples['samples'][0]
 
@@ -40,8 +43,8 @@ def log():
 def log_write(new_record):
     try:
         with open('log.csv', 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(new_record)
+            writer = csv.writer(csvfile)
+            writer.writerow(new_record)
     except IOError:
         print("error opening file")
 
