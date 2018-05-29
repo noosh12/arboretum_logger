@@ -40,7 +40,7 @@ def log():
         node_id = str(data_samples['source_addr_long'])
         node_id = re.sub('[^A-Za-z0-9]+', '', node_id)
         time = str(datetime.now())
-        print(time)
+        time = time[11:-10]
 
         vwc_600 = ((11.9*(((float(samples['adc-0'])*1200)/1023)/10000))-0.401)*100
         vwc_300 = ((11.9*(((float(samples['adc-1'])*1200)/1023)/10000))-0.401)*100
@@ -50,42 +50,42 @@ def log():
         if(sample_count < 2):
             if(node_id == node1):
                 node1_battery = battery
-                # print('n1 first: '+str(battery))
+                print('n1 first: '+str(battery))
             elif(node_id == node2):
                 node2_battery = battery
-                # print('n2 first: '+str(battery))
+                print('n2 first: '+str(battery))
             sample_count+=1
 
         elif(sample_count == 2):
             if(node_id == node1):
-                # print('n1 second: '+str(battery))
+                print('n1 second: '+str(battery))
                 node1_battery += battery
                 node1_battery = node1_battery/2.0
             elif(node_id == node2):
-                # print('n2 second: '+str(battery))
+                print('n2 second: '+str(battery))
                 node2_battery += battery
                 node2_battery = node2_battery/2.0
             sample_count+=1
         else:
             if(node_id == node1):
-                # print('n1 second: '+str(battery))
+                print('n1 second: '+str(battery))
                 node1_battery += battery
                 node1_battery = node1_battery/2.0
-                log_write(node1_battery, node2_battery)
+                log_write(time, node1_battery, node2_battery)
             elif(node_id == node2):
-                # print('n2 second: '+str(battery))
+                print('n2 second: '+str(battery))
                 node2_battery += battery
                 node2_battery = node2_battery/2.0
-                log_write(node1_battery, node2_battery)
+                log_write(time, node1_battery, node2_battery)
             sample_count = 0
 
 
-def log_write(node1_battery, node2_battery):
+def log_write(time, node1_battery, node2_battery):
     try: 
         with open('log.csv', 'a', newline='') as myFile:  
             writer = csv.writer(myFile, dialect='excel')
-            writer.writerow([node1_battery, node2_battery])
-            print('n1: '+str(node1_battery)+'   n2: '+str(node2_battery))
+            writer.writerow([time, node1_battery, node2_battery])
+            print('time: '+time+'     n1: '+str(node1_battery)+'   n2: '+str(node2_battery))
 
     except IOError:
         print("error opening file")
