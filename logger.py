@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from datetime import datetime
 import serial
 import xbee
@@ -36,9 +38,12 @@ def log():
         log_write(new_record)
 
 def log_write(new_record):
-    with open('log.csv', 'w', newline='') as csvfile:
+    try:
+        with open('log.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(new_record)
+    except IOError:
+        print("error opening file")
 
 
 if __name__ == "__main__":
