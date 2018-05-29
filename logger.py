@@ -29,9 +29,9 @@ def log():
         node_id = data_samples['source_addr_long']
         time = datetime.now()
 
-        vwc_600 = ((11.9*(((float(samples['adc-0'])*1200)/1024)/10000))-0.401)*100
-        vwc_300 = ((11.9*(((float(samples['adc-1'])*1200)/1024)/10000))-0.401)*100
-        temp_100 = ((((float(samples['adc-2'])*1.2)/1024)*3)*41.67)-40
+        vwc_600 = ((11.9*(((float(samples['adc-0'])*1200)/1023)/10000))-0.401)*100
+        vwc_300 = ((11.9*(((float(samples['adc-1'])*1200)/1023)/10000))-0.401)*100
+        temp_100 = ((((float(samples['adc-2'])*1.2)/1023)*3)*41.67)-40
         battery = float(samples['adc-3'])
 
         new_record = time+','+node_id+','+battery
