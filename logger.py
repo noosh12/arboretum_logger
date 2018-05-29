@@ -3,7 +3,7 @@
 from datetime import datetime
 import serial
 import xbee
-import settings
+#import settings
 import os
 import csv
 
@@ -29,22 +29,25 @@ def log():
         data_samples = xbee1.wait_read_frame()
         samples = data_samples['samples'][0]
 
-        node_id = data_samples['source_addr_long']
+        #node_id = str(data_samples['source_addr_long'])
+        node_id = str(data_samples['source_addr'])
         time = datetime.now()
 
         vwc_600 = ((11.9*(((float(samples['adc-0'])*1200)/1023)/10000))-0.401)*100
         vwc_300 = ((11.9*(((float(samples['adc-1'])*1200)/1023)/10000))-0.401)*100
         temp_100 = ((((float(samples['adc-2'])*1.2)/1023)*3)*41.67)-40
         battery = float(samples['adc-3'])
+        
+        log_write(node_id, battery)
 
-        new_record = time+','+node_id+','+battery
-        log_write(new_record)
 
-def log_write(new_record):
-    try:
-        with open('log.csv', 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(new_record)
+def log_write(node_id, battery):
+    try: 
+        with open('log.csv', 'a', newline='') as myFile:  
+            writer = csv.writer(myFile, dialect='excel')
+            writer.writerow([node_id, battery])
+            print(node_id+','+str(battery))
+
     except IOError:
         print("error opening file")
 
