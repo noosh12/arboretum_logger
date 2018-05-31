@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from datetime import datetime
+from threading import Timer
 import serial
 import xbee
 #import settings
@@ -31,6 +32,7 @@ def log():
     node2_battery = 0.0
     node1 = "bx00x13xa2x00Abx9cZ"
     node2 = "bx00x13xa2x00Abx9cxbf"
+    is_first = True
 
     while True:
         data_samples = xbee1.wait_read_frame()
@@ -46,6 +48,11 @@ def log():
         vwc_300 = ((11.9*(((float(samples['adc-1'])*1200)/1023)/10000))-0.401)*100
         temp_100 = ((((float(samples['adc-2'])*1.2)/1023)*3)*41.67)-40
         battery = float(samples['adc-3'])
+
+        if(is_first):
+            is_first = False
+            timer = Timer(12.0, (log_write(time, node1_battery, node2_battery))
+            timer.start
         
         if(sample_count < 2):
             if(node_id == node1):
@@ -89,6 +96,8 @@ def log_write(time, node1_battery, node2_battery):
 
     except IOError:
         print("error opening file")
+
+    is_first = True
 
 
 if __name__ == "__main__":
