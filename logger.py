@@ -43,48 +43,61 @@ def log():
         time = str(datetime.now())
         time = time[11:-10]
 
-        vwc_600 = ((11.9*(((float(samples['adc-0'])*1200)/1023)/10000))-0.401)*100
-        vwc_300 = ((11.9*(((float(samples['adc-1'])*1200)/1023)/10000))-0.401)*100
-        temp_100 = ((((float(samples['adc-2'])*1.2)/1023)*3)*41.67)-40
-        battery = float(samples['adc-3'])
-
+        vwc_600 = vwc_conversion(float(samples['adc-0']))
+        vwc_300 = vwc_conversion(float(samples['adc-1']))
+        temp_100 = temp_conversion(float(samples['adc-2']))
+        battery = battery_conversion(float(samples['adc-3']))
 
         if(not timer.is_alive()):
-            node1_battery = 0.0
-            node2_battery = 0.0
-            charge = [0.0, 0.0]
+
+            readings = [0.0, 0.0, 0.0, 0.0, 0]
             
-            timer = threading.Timer(15.0, timer_test, args=[charge])
+            timer = threading.Timer(15.0, timer_test, args=[readings])
             timer.start()
             print('timer started')
             print(str(datetime.now()))
+            
 
 
         if(node_id == node1):
-            charge[0] += battery
+            readings[0] += vwc_600
+            readings[1] += vwc_300
+            readings[2] += temp_100
+            readings[3] += battery
+            readings[4] += 1
+            print(readings)
+
         if(node_id == node2):
-            charge[1] += battery
+            # charge[1] += battery
+            print("node2 not updating log")
 
 
-def log_write(time, node1_battery, node2_battery):
-    try: 
-        with open('log.csv', 'a', newline='') as myFile:  
-            writer = csv.writer(myFile, dialect='excel')
-            writer.writerow([time, node1_battery, node2_battery])
-            # print('time: '+time+'     n1: '+str(node1_battery)+'   n2: '+str(node2_battery))
+# def log_write(time, node1_battery, node2_battery):
+#     try: 
+#         with open('log.csv', 'a', newline='') as myFile:  
+#             writer = csv.writer(myFile, dialect='excel')
+#             writer.writerow([time, node1_battery, node2_battery])
+#             # print('time: '+time+'     n1: '+str(node1_battery)+'   n2: '+str(node2_battery))
 
-    except IOError:
-        print("error opening file")
+#     except IOError:
+#         print("error opening file")
 
 
 def timer_test(readings):
     time = str(datetime.now())
     time = time[11:-10]
+    print(readings)
+    count = readings[4]
+    vwc1 = round(readings[0]/count, 4)
+    vwc2 = round(readings[1]/count, 4)
+    temp = round(readings[2]/count, 1)
+    battery = round(readings[3]/count, 3)
+
 
     try: 
         with open('log.csv', 'a', newline='') as myFile:  
             writer = csv.writer(myFile, dialect='excel')
-            writer.writerow([time, readings[0]/4.0, readings[1]/4.0])
+            writer.writerow([time, vwc1, vwc2, temp, battery])
             # print('time: '+time+'     n1: '+str(node1_battery)+'   n2: '+str(node2_battery))
 
     except IOError:
@@ -93,6 +106,23 @@ def timer_test(readings):
     print("timer complete")
     print(str(datetime.now()))
     # return True
+
+def adc_conversion(reading):
+    return reading*1250/1023
+
+def vwc_conversion(reading):
+    raw = reading*0.61*4095/982
+    return (raw*8.5*0.0001)-0.48
+
+def temp_conversion(reading):
+    mv = adc_conversion(reading)
+    return mv*3*41.67/1000-40
+
+def battery_conversion(reading):
+    return (constrain_battery(reading)-730)/100
+
+def constrain_battery(reading):
+    return min(830, max(730, reading))
 
 
 
